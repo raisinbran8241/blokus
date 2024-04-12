@@ -1,3 +1,4 @@
+from copy import deepcopy
 from piece import Piece
 from typing import List
 
@@ -9,6 +10,7 @@ class GameBoard:
         self._width = width
         self._height = height
         self._board = [[-1 for _ in range(width)] for _ in range(height)]
+        self._shadow_board = deepcopy(self._board)
         self._first_move = True
 
     @property
@@ -22,24 +24,43 @@ class GameBoard:
     @property
     def board(self):
         return self._board
+    
+    @property
+    def shadow_board(self):
+        return self._shadow_board
 
     @property
     def first_move(self):
         return self._first_move
-
+    
+    def toggle_first_move(self):
+        self._first_move = False
+    
     def place_piece(self, piece: Piece, row: int, col: int, player_id: int) -> bool:
         """Places a piece on the board."""
-        # Check if the placement of the piece is valid
         if self.is_placement_valid(piece, row, col, player_id):
-            piece_height, piece_width = len(piece), len(piece[0])
-            # Loop through and change the board accordingly
-            for i in range(piece_height):
-                for j in range(piece_width):
-                    if piece[i][j] == 0:
-                        print(row + i, col + j, player_id)
-                        self._board[row + i][col + j] = player_id
+            self.update_board(piece, row, col, player_id)
             return True
         return False
+    
+    def update_shadow(self, piece: Piece, row: int, col: int, player_id: int) -> None:
+        self._shadow_board = deepcopy(self.board)
+        piece_height, piece_width = len(piece), len(piece[0])
+        # Loop through and update copy board accordingly
+        for i in range(piece_height):
+            for j in range(piece_width):
+                if piece[i][j] == 0:
+                    if (row + i < 20 and col + j < 20):
+                        self._shadow_board[row + i][col + j] = player_id
+
+    def update_board(self, piece: Piece, row: int, col: int, player_id: int) -> None:
+        """Updates the board based on a piece."""
+        piece_height, piece_width = len(piece), len(piece[0])
+        # Loop through and change the board accordingly
+        for i in range(piece_height):
+            for j in range(piece_width):
+                if piece[i][j] == 0:
+                    self._board[row + i][col + j] = player_id
 
     def is_placement_valid(
         self, piece: Piece, row: int, col: int, player_id: int
@@ -59,14 +80,14 @@ class GameBoard:
                 if (
                     row + piece_height != 20
                     or col + piece_width != 20
-                    or piece[-1][-1] != 1
+                    or piece[-1][-1] != 0
                 ):
                     return False
             elif player_id == 2:  # Red, bottom left
-                if row + piece_height != 20 or col != 0 or piece[-1][0] != 2:
+                if row + piece_height != 20 or col != 0 or piece[-1][0] != 0:
                     return False
             elif player_id == 3:  # Green, top left
-                if row != 0 or col != 0 or piece[0][0] != 3:
+                if row != 0 or col != 0 or piece[0][0] != 0:
                     return False
             return True
 

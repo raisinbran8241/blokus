@@ -2,10 +2,11 @@ from typing import List
 
 
 class Piece:
-    def __init__(self, shape: List[List[int]]):
+    def __init__(self, shape: List[List[int]], id: int):
         self._shape = shape
         self._orientation = 0  # 0: normal, 1: (clockwise) 90, 180, 270
         self._mirror = 0  # 0: normal, 1: vertical, 2: horizontal
+        self._id = id
 
     def __str__(self):
         return str(self._shape)

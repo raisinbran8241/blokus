@@ -1,3 +1,4 @@
+import pygame
 from game_board import GameBoard
 from graphics_handler import GraphicsHandler
 from player import Player
@@ -6,7 +7,7 @@ from player import Player
 class Game:
     """Merges all the parts of the game together."""
 
-    def __init__(self, num_players):
+    def __init__(self, num_players: int):
         self._num_players = num_players
         self._board = GameBoard(20, 20)
         self._current_player = 0
@@ -14,13 +15,6 @@ class Game:
         self._players: list[Player] = []
         for i in range(num_players):
             self._players.append(Player("", i))
-
-        self._players[0].selected_piece_id = 12
-        player = self._players[self.current_player]
-        piece = player.get_piece_from_id(player.selected_piece_id)
-        print(piece)
-        self._board.place_piece(piece, 0, 17, self._current_player)
-        self._graphics_handler.update_screen(self._board)
 
     @property
     def num_players(self):
@@ -36,4 +30,34 @@ class Game:
 
     def update_turn(self):
         """Updates self._current_player. For example, it goes from 0 to 1, 1 to 2, etc."""
+        if self._current_player + 1 == 4:
+            self._board.toggle_first_move()
         self._current_player = (self._current_player + 1) % self._num_players
+
+    def handle_mouse(self, event: pygame.event.Event, coords: tuple):
+
+        # Get the coordinates and check if it is an actual move
+        square = self._graphics_handler.get_square_from_coords(coords)
+        if (-1 in square):
+            return
+
+        import random  # Just for testing purposes
+        player = self._players[self._current_player]
+        piece = player.get_piece()
+        while player.piece_id in player._used_pieces:
+                player.piece_id = random.randint(1, 21)
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  
+            if self._board.place_piece(piece, square[0], square[1], self._current_player):
+                player.use_piece()
+                self.update_turn()
+        elif event.type == pygame.MOUSEMOTION:
+            # TODO: flash red shadow piece in illegal moves
+            self._board.update_shadow(piece, square[0], square[1], self._current_player)
+            self._graphics_handler.update_screen(self._board)
+
+    def handle_keyboard(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN:
+            pass
+
+

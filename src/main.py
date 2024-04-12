@@ -1,8 +1,8 @@
 import pygame
-from graphics_handler import GraphicsHandler
 from game import Game
 
-# pygame setup
+# Game setup
+pygame.init()
 game = Game(4)
 clock = pygame.time.Clock()
 running = True
@@ -13,8 +13,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    # RENDER YOUR GAME HERE
+        
+        pos = pygame.mouse.get_pos()
+        game.handle_mouse(event, pos)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
