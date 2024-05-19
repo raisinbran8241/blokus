@@ -28,7 +28,9 @@ class Player:
         # Pentominoes
         self._pieces.append(Piece([[-1, 0], [0, 0], [0, 0]], 10))  # 5-P (10)
         self._pieces.append(Piece([[0, 0], [0, -1], [0, 0]], 11))  # 5-U (11)
-        self._pieces.append(Piece([[-1, -1, 0], [0, 0, 0], [-1, -1, 0]], 12))  # 5-T (12)
+        self._pieces.append(
+            Piece([[-1, -1, 0], [0, 0, 0], [-1, -1, 0]], 12)
+        )  # 5-T (12)
         self._pieces.append(
             Piece(
                 [
@@ -37,19 +39,29 @@ class Player:
                     [0, 0],
                     [0, -1],
                 ],
-                13
+                13,
             )  # 5-S (13)
         )
-        self._pieces.append(Piece([[-1, 0, 0], [-1, 0, -1], [0, 0, -1]], 14))  # 5-Z (14)
-        self._pieces.append(Piece([[-1, 0, -1], [-1, 0, 0], [0, 0, -1]], 15))  # 5-F (15)
+        self._pieces.append(
+            Piece([[-1, 0, 0], [-1, 0, -1], [0, 0, -1]], 14)
+        )  # 5-Z (14)
+        self._pieces.append(
+            Piece([[-1, 0, -1], [-1, 0, 0], [0, 0, -1]], 15)
+        )  # 5-F (15)
         self._pieces.append(Piece([[0, 0, 0, 0], [-1, -1, -1, 0]], 16))  # 5-L (16)
-        self._pieces.append(Piece([[-1, 0, 0], [0, 0, -1], [0, -1, -1]], 17))  # 5-W (17)
-        self._pieces.append(Piece([[-1, 0, -1], [0, 0, 0], [-1, 0, -1]], 18))  # 5-X (18)
+        self._pieces.append(
+            Piece([[-1, 0, 0], [0, 0, -1], [0, -1, -1]], 17)
+        )  # 5-W (17)
+        self._pieces.append(
+            Piece([[-1, 0, -1], [0, 0, 0], [-1, 0, -1]], 18)
+        )  # 5-X (18)
         self._pieces.append(Piece([[0, 0, 0, 0, 0]], 19))  # 5-I (19)
-        self._pieces.append(Piece([[-1, -1, 0], [-1, -1, 0], [0, 0, 0]], 20))  # 5-V (20)
+        self._pieces.append(
+            Piece([[-1, -1, 0], [-1, -1, 0], [0, 0, 0]], 20)
+        )  # 5-V (20)
         self._pieces.append(Piece([[-1, 0, -1, -1], [0, 0, 0, 0]], 21))  # 5-Y (21)
 
-        self._used_pieces = [0]
+        self._available_pieces = [_ for _ in range(1, 22)]
 
     @property
     def name(self):
@@ -58,10 +70,10 @@ class Player:
     @property
     def id(self):
         return self._id
-    
+
     @property
     def used_pieces(self):
-        return self._used_pieces
+        return self._available_pieces
 
     @property
     def piece_id(self):
@@ -70,7 +82,7 @@ class Player:
     @piece_id.setter
     def piece_id(self, piece_id) -> None:
         """Sets the selected piece of the player."""
-        if piece_id not in self._used_pieces:
+        if piece_id in self._available_pieces:
             self._piece_id = piece_id
         else:
             pass  # TODO: Raise
@@ -82,10 +94,19 @@ class Player:
     def get_piece_from_id(self, piece_id) -> Piece:
         """Returns a piece from its ID."""
         return self._pieces[piece_id]
-    
+
     def use_piece(self) -> None:
-        if self._piece_id not in self._used_pieces:
-            self._used_pieces.append(self._piece_id)
+        if self._piece_id in self._available_pieces:
+            self._available_pieces.remove(self._piece_id)
         else:
             pass  # TODO: Raise an error
-    
+
+    def next_piece(self) -> None:
+        self._piece_id = self._available_pieces[
+            (self.piece_id) % len(self._available_pieces)
+        ]  # Already added one (one-index)
+
+    def previous_piece(self) -> None:
+        self._piece_id = self._available_pieces[
+            self.piece_id - 1 - 1
+        ]  # One for one-index, one for -1
