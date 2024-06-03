@@ -23,7 +23,7 @@ class Player:
         self._pieces.append(Piece([[0, 0], [0, 0]], 6))  # 4-O (6)
         self._pieces.append(Piece([[-1, 0, -1], [0, 0, 0]], 7))  # 4-T (7)
         self._pieces.append(Piece([[0, 0, 0], [-1, -1, 0]], 8))  # 4-L (8)
-        self._pieces.append(Piece([[0, 0, 0, 0, 0]], 9))  # 4-I (9)
+        self._pieces.append(Piece([[0, 0, 0, 0]], 9))  # 4-I (9)
 
         # Pentominoes
         self._pieces.append(Piece([[-1, 0], [0, 0], [0, 0]], 10))  # 5-P (10)
@@ -87,6 +87,10 @@ class Player:
         else:
             pass  # TODO: Raise
 
+    @property
+    def available_pieces(self):
+        return self._available_pieces
+
     def get_piece(self) -> Piece:
         """Gets the selected piece of the player."""
         return self._pieces[self._piece_id]
@@ -98,6 +102,7 @@ class Player:
     def use_piece(self) -> None:
         if self._piece_id in self._available_pieces:
             self._available_pieces.remove(self._piece_id)
+            print(self._available_pieces)
         else:
             pass  # TODO: Raise an error
 
@@ -108,5 +113,6 @@ class Player:
 
     def previous_piece(self) -> None:
         self._piece_id = self._available_pieces[
-            self.piece_id - 1 - 1
+            (self._available_pieces.index(self.piece_id) - 1) % len(self._available_pieces)
         ]  # One for one-index, one for -1
+        print(self.id, self._available_pieces)

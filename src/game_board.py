@@ -137,23 +137,23 @@ class GameBoard:
                         touches_corners = True
                     if (  # Bottom-left corner
                         row + i + 1 < self._height
-                        and col + j - 1 > 0
+                        and col + j - 1 >= 0
                         and self._board[row + i + 1][col + j - 1] == player_id
                     ):
                         touches_corners = True
                     if (  # Top-left corner
-                        row + i - 1 > 0
-                        and col + j - 1 > 0
+                        row + i - 1 >= 0
+                        and col + j - 1 >= 0
                         and self._board[row + i - 1][col + j - 1] == player_id
                     ):
                         touches_corners = True
                     if (  # Top-right corner
-                        row + i - 1 > 0
+                        row + i - 1 >= 0
                         and col + j + 1 < self._width
                         and self._board[row + i - 1][col + j + 1] == player_id
                     ):
                         touches_corners = True
-
+                    
         if touches_corners:
             return True
         return False

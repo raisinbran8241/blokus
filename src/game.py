@@ -27,6 +27,10 @@ class Game:
     @property
     def current_player(self):
         return self._current_player
+        
+    @property 
+    def players(self):
+        return self._players
 
     def update_turn(self):
         """Updates self._current_player. 0 to 1, 1 to 2, etc."""
@@ -56,7 +60,7 @@ class Game:
                 self.update_turn()
         self._board.update_shadow(piece, square[0], square[1], self._current_player)
 
-        self._graphics_handler.update_screen(self._board, self.current_player)
+        self._graphics_handler.update_screen(self._board, self.current_player, self.players)
 
     def handle_keyboard(self, event: pygame.event.Event):
         # TODO: Add reflecting pieces
