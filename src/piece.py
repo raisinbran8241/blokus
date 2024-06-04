@@ -87,3 +87,11 @@ class Piece:
                 self.orientation += 2
             else:
                 self._mirror = 2
+
+    def get_num_squares(self) -> int:
+        squares = 0
+        for i in range(len(self.shape)):
+            for j in range(len(self.shape[0])):
+                if self.shape[i][j] == 0:
+                    squares += 1
+        return squares

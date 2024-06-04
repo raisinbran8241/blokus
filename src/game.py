@@ -27,8 +27,8 @@ class Game:
     @property
     def current_player(self):
         return self._current_player
-        
-    @property 
+
+    @property
     def players(self):
         return self._players
 
@@ -44,12 +44,13 @@ class Game:
         if -1 in square:
             return
 
-        import random  # Just for testing purposes,randomly picks a piece
-
+        # No pieces left? Skip the turn
         player = self._players[self._current_player]
+        if player.all_pieces_used:  # Will update later
+            self.update_turn()
+
+        player.set_to_lowest_value_piece()
         piece = player.get_piece()
-        while player.piece_id not in player._available_pieces:
-            player.piece_id = random.randint(1, 21)
 
         # Places a piece on left click
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -58,9 +59,14 @@ class Game:
             ):
                 player.use_piece()
                 self.update_turn()
+
+        # Update the shadow board
         self._board.update_shadow(piece, square[0], square[1], self._current_player)
 
-        self._graphics_handler.update_screen(self._board, self.current_player, self.players)
+        # Update the screen
+        self._graphics_handler.update_screen(
+            self._board, self.current_player, self.players
+        )
 
     def handle_keyboard(self, event: pygame.event.Event):
         # TODO: Add reflecting pieces
@@ -70,7 +76,15 @@ class Game:
             piece.rotate_clockwise()
         elif event.key == pygame.K_z:
             piece.rotate_counterclockwise()
+        elif event.key == pygame.K_a:
+            piece.flip_vertically()
+        elif event.key == pygame.K_s:
+            piece.flip_horizontally()
+        elif event.key == pygame.K_LEFT:
+            player.left_piece()
+        elif event.key == pygame.K_RIGHT:
+            player.right_piece()
         elif event.key == pygame.K_DOWN:
-            player.next_piece()
+            player.down_piece()
         elif event.key == pygame.K_UP:
-            player.previous_piece()
+            player.up_piece()

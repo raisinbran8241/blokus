@@ -1,6 +1,5 @@
 from copy import deepcopy
 from piece import Piece
-from typing import List
 
 
 class GameBoard:
@@ -113,7 +112,7 @@ class GameBoard:
                     ):  # Bottom
                         return False
                     if (
-                        row + i - 1 > 0
+                        row + i - 1 >= 0
                         and self._board[row + i - 1][col + j] == player_id
                     ):  # Top
                         return False
@@ -123,7 +122,7 @@ class GameBoard:
                     ):  # Right
                         return False
                     if (
-                        col + j - 1 > 0
+                        col + j - 1 >= 0
                         and self._board[row + i][col + j - 1] == player_id
                     ):  # Left
                         return False
@@ -153,7 +152,7 @@ class GameBoard:
                         and self._board[row + i - 1][col + j + 1] == player_id
                     ):
                         touches_corners = True
-                    
+
         if touches_corners:
             return True
         return False

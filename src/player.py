@@ -1,6 +1,5 @@
-from typing import List
-
 from piece import Piece
+from copy import deepcopy
 
 
 class Player:
@@ -9,10 +8,9 @@ class Player:
     def __init__(self, name: str, player_id: int):
         self._name = name
         self._id = player_id
-        self._pieces: List[Piece] = [Piece([[]], 0)]  # Default starts with empty
+        self._pieces: list[Piece] = [Piece([[]], 0)]  # Default starts with empty
         self._piece_id: int = 0
 
-        # Shove pieces into init (might change later)
         self._pieces.append(Piece([[0]], 1))  # 1-I (1)
         self._pieces.append(Piece([[0, 0]], 2))  # 2-I (2)
         self._pieces.append(Piece([[0, 0, 0]], 3))  # 3-L (3)
@@ -61,7 +59,10 @@ class Player:
         )  # 5-V (20)
         self._pieces.append(Piece([[-1, 0, -1, -1], [0, 0, 0, 0]], 21))  # 5-Y (21)
 
+        self._pieces_copy = deepcopy(self._pieces)
         self._available_pieces = [_ for _ in range(1, 22)]
+        self._squares_left = 89
+        self._all_pieces_used = False
 
     @property
     def name(self):
@@ -88,31 +89,58 @@ class Player:
             pass  # TODO: Raise
 
     @property
+    def pieces_copy(self):
+        return self._pieces_copy
+
+    @property
     def available_pieces(self):
         return self._available_pieces
 
+    @property
+    def squares_left(self):
+        return self._squares_left
+
+    @property
+    def all_pieces_used(self):
+        return self._all_pieces_used
+
     def get_piece(self) -> Piece:
         """Gets the selected piece of the player."""
-        return self._pieces[self._piece_id]
+        if self._piece_id in self._available_pieces:
+            return self._pieces[
+                self._piece_id
+            ]  # Don't return copy piece because it doesn't keep the orientation
+        else:
+            return self._pieces[0]
 
-    def get_piece_from_id(self, piece_id) -> Piece:
-        """Returns a piece from its ID."""
-        return self._pieces[piece_id]
+    def set_to_lowest_value_piece(self) -> None:
+        """Sets the piece_id to whichever piece has the lowest ID."""
+        for i in range(1, 22):
+            if i in self._available_pieces:
+                self._piece_id = i
+                break
 
     def use_piece(self) -> None:
-        if self._piece_id in self._available_pieces:
-            self._available_pieces.remove(self._piece_id)
-            print(self._available_pieces)
-        else:
-            pass  # TODO: Raise an error
+        self._available_pieces.remove(self._piece_id)
+        self._squares_left -= self._pieces[self._piece_id].get_num_squares()
 
-    def next_piece(self) -> None:
-        self._piece_id = self._available_pieces[
-            (self.piece_id) % len(self._available_pieces)
-        ]  # Already added one (one-index)
+        if len(self._available_pieces) == 0:
+            self._all_pieces_used = True
 
-    def previous_piece(self) -> None:
-        self._piece_id = self._available_pieces[
-            (self._available_pieces.index(self.piece_id) - 1) % len(self._available_pieces)
-        ]  # One for one-index, one for -1
-        print(self.id, self._available_pieces)
+        self.set_to_lowest_value_piece()
+
+    def left_piece(self) -> None:
+        if not (self._piece_id - 1) % 5 == 0 and self.piece_id > 1:
+            self._piece_id -= 1
+
+    def right_piece(self) -> None:
+        if not self._piece_id % 5 == 0 and self.piece_id != 21:
+            self._piece_id += 1
+
+    def up_piece(self) -> None:
+        if not self._piece_id - 5 <= 0:
+            self._piece_id -= 5
+
+    def down_piece(self) -> None:
+        if not self._piece_id + 5 >= 22:
+            self._piece_id += 5

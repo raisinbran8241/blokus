@@ -17,8 +17,13 @@ class GraphicsHandler:
         self._PLAYER_GRID_WIDTH = 80
         self._PLAYER_GRID_BOX_SIZE = 15
 
-        self.font = pygame.font.SysFont("Fira Code", 30)
+        # Only turn tracker has bigger size font, everything else is 20
+        self._FONT_SIZE = 30
+        self.font = pygame.font.SysFont("Fira Code", self._FONT_SIZE)
         text_surface = self.font.render("'s turn", False, (0, 0, 0))
+
+        self._FONT_SIZE = 20
+        self.font = pygame.font.SysFont("Fira Code", self._FONT_SIZE)
 
         self._screen.fill(self._BG_COLOR)
         self._screen.blit(text_surface, (700, 70))
@@ -88,6 +93,7 @@ class GraphicsHandler:
 
         for i in range(len(players)):
             self._draw_player_grid_pieces(i, players)
+            self._update_score_text(i, players)
 
     def get_square_from_coords(self, coords):
         """Takes a set of coordinates and returns the position on the game board."""
@@ -101,7 +107,7 @@ class GraphicsHandler:
             if val <= y - self._Y_MARGIN <= val + self._GRID_BOX_SIZE:
                 square[0] = i
         return square
-    
+
     def _draw_game_grid(self):
         """Draws the main 20x20 grid of the game."""
         for i in range(21):  # Draw columns
@@ -132,13 +138,18 @@ class GraphicsHandler:
 
         # Draw the grid
         for i in range(6):  # Draw columns
+            dest_y = y_margin + (
+                self._piece_coordinates_y[-1]
+                if i in (0, 1, 5)
+                else self._piece_coordinates_y[-2]
+            )
             pygame.draw.line(
                 self._screen,
                 self._LINE_COLOR,
                 (self._piece_coordinates_x[i] + x_margin, 0 + y_margin),
                 (
                     self._piece_coordinates_x[i] + x_margin,
-                    self._piece_coordinates_y[-1] + y_margin,
+                    dest_y,
                 ),
             )
         for i in range(6):  # Draw rows
@@ -162,13 +173,19 @@ class GraphicsHandler:
         # Go through coordinates of the grid
         for y in self._piece_coordinates_y[:-1]:
             for x in self._piece_coordinates_x[:-1]:
-                # Check if the piece is 1) available, and 2) within range
-                if piece_id in player.available_pieces and piece_id <= 21:
-                    piece = player.get_piece_from_id(piece_id)
+                # If piece is available show it
+                if piece_id in player.available_pieces:
+                    piece = player.pieces_copy[piece_id]
 
                     # Calculate the amount of padding needing so the piece is centered in the grid square
-                    x_padding = (self._PLAYER_GRID_WIDTH - self._PLAYER_GRID_BOX_SIZE * len(piece[0])) / 2
-                    y_padding = (self._PLAYER_GRID_HEIGHT - self._PLAYER_GRID_BOX_SIZE * len(piece)) / 2
+                    x_padding = (
+                        self._PLAYER_GRID_WIDTH
+                        - self._PLAYER_GRID_BOX_SIZE * len(piece[0])
+                    ) / 2
+                    y_padding = (
+                        self._PLAYER_GRID_HEIGHT
+                        - self._PLAYER_GRID_BOX_SIZE * len(piece)
+                    ) / 2
 
                     # Display each square of each piece
                     for row in range(len(piece)):
@@ -178,8 +195,12 @@ class GraphicsHandler:
                                     self._screen,
                                     self._player_colors[player_id],
                                     (
-                                        (self._PLAYER_GRID_BOX_SIZE * col) + (x + x_margin + 1) + x_padding,
-                                        (self._PLAYER_GRID_BOX_SIZE * row) + (y + y_margin + 1) + y_padding,
+                                        (self._PLAYER_GRID_BOX_SIZE * col)
+                                        + (x + x_margin + 1)
+                                        + x_padding,
+                                        (self._PLAYER_GRID_BOX_SIZE * row)
+                                        + (y + y_margin + 1)
+                                        + y_padding,
                                         self._PLAYER_GRID_BOX_SIZE,
                                         self._PLAYER_GRID_BOX_SIZE,
                                     ),
@@ -197,3 +218,35 @@ class GraphicsHandler:
                     )
                     pass
                 piece_id += 1
+
+    def _update_score_text(self, player_id: int, players: list[Player]):
+        """Updates the score of each player in each box."""
+        player = players[player_id]
+        text_surface = self.font.render(
+            f"Squares left: {player.squares_left}", False, (0, 0, 0)
+        )
+
+        # Calculate the upper-left coordinate of the bounding box of the text
+        x_margin = self._player_grid_margins[player_id][0]
+        y_margin = self._player_grid_margins[player_id][1]
+        x = self._piece_coordinates_x[-5] + x_margin + 1
+        y = self._piece_coordinates_y[-2] + y_margin + 1
+
+        # Clear the previous drawing
+        pygame.draw.rect(
+            self._screen,
+            self._BG_COLOR,
+            (
+                x,
+                y,
+                self._PLAYER_GRID_WIDTH * 4,
+                self._PLAYER_GRID_HEIGHT,
+            ),
+        )
+
+        # Update x and y to center the text
+        x += 65
+        y += (self._PLAYER_GRID_HEIGHT - self._FONT_SIZE) / 2
+
+        # Draw the text
+        self._screen.blit(text_surface, (x, y))
