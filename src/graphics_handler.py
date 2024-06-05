@@ -10,6 +10,7 @@ class GraphicsHandler:
         # Set up the graphical environment
         self._screen = pygame.display.set_mode((1400, 750))
         self._BG_COLOR = (160, 160, 160)
+        self._HIGHLIGHT_COLOR = (253, 255, 50)
         self._X_MARGIN = 440
         self._Y_MARGIN = 160
         self._GRID_BOX_SIZE = 25
@@ -53,8 +54,6 @@ class GraphicsHandler:
             self._piece_coordinates_y.append(i * self._PLAYER_GRID_HEIGHT + i)
 
         self._player_grid_margins = [(984, 30), (984, 394), (15, 394), (15, 30)]
-        for i in range(len(self._player_grid_margins)):
-            self._draw_player_grid(i)
 
     def update_screen(
         self, game_board: GameBoard, current_player: int, players: list[Player]
@@ -94,6 +93,9 @@ class GraphicsHandler:
         for i in range(len(players)):
             self._draw_player_grid_pieces(i, players)
             self._update_score_text(i, players)
+            self._draw_player_grid(current_player)
+
+        self._highlight_piece(current_player, players)
 
     def get_square_from_coords(self, coords):
         """Takes a set of coordinates and returns the position on the game board."""
@@ -173,6 +175,18 @@ class GraphicsHandler:
         # Go through coordinates of the grid
         for y in self._piece_coordinates_y[:-1]:
             for x in self._piece_coordinates_x[:-1]:
+                # Clear the space first (from highlights)
+                pygame.draw.rect(
+                    self._screen,
+                    self._BG_COLOR,
+                    (
+                        x + x_margin + 1,
+                        y + y_margin + 1,
+                        self._PLAYER_GRID_WIDTH,
+                        self._PLAYER_GRID_HEIGHT,
+                    ),
+                )
+
                 # If piece is available show it
                 if piece_id in player.available_pieces:
                     piece = player.pieces_copy[piece_id]
@@ -205,19 +219,28 @@ class GraphicsHandler:
                                         self._PLAYER_GRID_BOX_SIZE,
                                     ),
                                 )
-                else:
-                    pygame.draw.rect(
-                        self._screen,
-                        self._BG_COLOR,
-                        (
-                            x + x_margin + 1,
-                            y + y_margin + 1,
-                            self._PLAYER_GRID_WIDTH,
-                            self._PLAYER_GRID_HEIGHT,
-                        ),
-                    )
-                    pass
                 piece_id += 1
+
+    def _highlight_piece(self, player_id: int, players: list[Player]):
+        player = players[player_id]
+        piece_id = player.piece_id
+        x = self._player_grid_margins[player_id][0] + (self._PLAYER_GRID_WIDTH + 1) * (
+            (piece_id - 1) % 5
+        )
+        y = self._player_grid_margins[player_id][1] + (self._PLAYER_GRID_HEIGHT + 1) * (
+            (piece_id - 1) // 5
+        )
+        pygame.draw.rect(
+            self._screen,
+            self._HIGHLIGHT_COLOR,
+            (
+                x,
+                y,
+                self._PLAYER_GRID_WIDTH + 2,
+                self._PLAYER_GRID_HEIGHT + 2,
+            ),
+            width=3,
+        )
 
     def _update_score_text(self, player_id: int, players: list[Player]):
         """Updates the score of each player in each box."""

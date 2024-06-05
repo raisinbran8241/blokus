@@ -9,7 +9,7 @@ class Player:
         self._name = name
         self._id = player_id
         self._pieces: list[Piece] = [Piece([[]], 0)]  # Default starts with empty
-        self._piece_id: int = 0
+        self._piece_id: int = 1
 
         self._pieces.append(Piece([[0]], 1))  # 1-I (1)
         self._pieces.append(Piece([[0, 0]], 2))  # 2-I (2)

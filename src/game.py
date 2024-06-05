@@ -49,7 +49,6 @@ class Game:
         if player.all_pieces_used:  # Will update later
             self.update_turn()
 
-        player.set_to_lowest_value_piece()
         piece = player.get_piece()
 
         # Places a piece on left click
@@ -69,7 +68,6 @@ class Game:
         )
 
     def handle_keyboard(self, event: pygame.event.Event):
-        # TODO: Add reflecting pieces
         player = self._players[self._current_player]
         piece = player.get_piece()
         if event.key == pygame.K_x:
@@ -88,3 +86,7 @@ class Game:
             player.down_piece()
         elif event.key == pygame.K_UP:
             player.up_piece()
+
+        self._graphics_handler.update_screen(
+            self._board, self.current_player, self.players
+        )
