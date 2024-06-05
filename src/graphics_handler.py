@@ -93,7 +93,7 @@ class GraphicsHandler:
         for i in range(len(players)):
             self._draw_player_grid_pieces(i, players)
             self._update_score_text(i, players)
-            self._draw_player_grid(current_player)
+            self._draw_player_grid(i)
 
         self._highlight_piece(current_player, players)
 
