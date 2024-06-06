@@ -39,6 +39,7 @@ class GameBoard:
         """Places a piece on the board."""
         if self.is_placement_valid(piece, row, col, player_id):
             self.update_board(piece, row, col, player_id)
+            print(self.board)
             return True
         return False
 
@@ -67,6 +68,15 @@ class GameBoard:
             for j in range(piece_width):
                 if piece[i][j] == 0:
                     self._board[row + i][col + j] = player_id
+
+    def can_place_piece(self, piece: Piece, player_id: int) -> bool:
+        """Checks if a piece can be placed anywhere on the board in its current orientation."""
+        piece_height, piece_width = len(piece), len(piece[0])
+        for i in range(20 - piece_height + 1):
+            for j in range(20 - piece_width + 1):
+                if self.is_placement_valid(piece, i, j, player_id):
+                    return True
+        return False
 
     def is_placement_valid(
         self, piece: Piece, row: int, col: int, player_id: int

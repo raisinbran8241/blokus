@@ -62,7 +62,7 @@ class Player:
         self._pieces_copy = deepcopy(self._pieces)
         self._available_pieces = [_ for _ in range(1, 22)]
         self._squares_left = 89
-        self._all_pieces_used = False
+        self._last_piece_played = None
 
     @property
     def name(self):
@@ -101,8 +101,8 @@ class Player:
         return self._squares_left
 
     @property
-    def all_pieces_used(self):
-        return self._all_pieces_used
+    def last_piece_played(self):
+        return self._last_piece_played
 
     def get_piece(self) -> Piece:
         """Gets the selected piece of the player."""
@@ -124,9 +124,7 @@ class Player:
         self._available_pieces.remove(self._piece_id)
         self._squares_left -= self._pieces[self._piece_id].get_num_squares()
 
-        if len(self._available_pieces) == 0:
-            self._all_pieces_used = True
-
+        self._last_piece_played = self._piece_id
         self.set_to_lowest_value_piece()
 
     def left_piece(self) -> None:

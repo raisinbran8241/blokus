@@ -18,16 +18,7 @@ class GraphicsHandler:
         self._PLAYER_GRID_WIDTH = 80
         self._PLAYER_GRID_BOX_SIZE = 15
 
-        # Only turn tracker has bigger size font, everything else is 20
-        self._FONT_SIZE = 30
-        self.font = pygame.font.SysFont("Fira Code", self._FONT_SIZE)
-        text_surface = self.font.render("'s turn", False, (0, 0, 0))
-
-        self._FONT_SIZE = 20
-        self.font = pygame.font.SysFont("Fira Code", self._FONT_SIZE)
-
         self._screen.fill(self._BG_COLOR)
-        self._screen.blit(text_surface, (700, 70))
         pygame.display.set_caption("Blokus")
 
         self._player_colors = [
@@ -43,7 +34,6 @@ class GraphicsHandler:
         self._coordinates = []
         for i in range(21):
             self._coordinates.append(i * self._GRID_BOX_SIZE + i)
-        self._draw_game_grid()
 
         # Draw player grids (5x4, 4 players)
         self._piece_coordinates_x = []
@@ -55,14 +45,71 @@ class GraphicsHandler:
 
         self._player_grid_margins = [(984, 30), (984, 394), (15, 394), (15, 30)]
 
-    def update_screen(
+    def update_main_menu(self, play_button: bool, rules_button: bool) -> None:
+        # Fill in screen to redraw everything
+        self._screen.fill(self._BG_COLOR)
+
+        bold_font = pygame.font.Font("./FiraCode-SemiBold.ttf", 84)
+        text_surface = bold_font.render("Blokus", False, (0, 0, 0))
+        self._screen.blit(text_surface, (550, 200))
+
+        font = pygame.font.SysFont("Fira Code", 50)
+        # Expand buttons when hovered over
+        if play_button:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (520, 395, 374, 110),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 44)
+            self._screen.blit(font.render("Start", False, (0, 0, 0)), (635, 426))
+        else:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (530, 400, 340, 100),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 40)
+            self._screen.blit(font.render("Start", False, (0, 0, 0)), (640, 430))
+        if rules_button:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (520, 545, 374, 110),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 44)
+            self._screen.blit(font.render("About", False, (0, 0, 0)), (635, 576))
+        else:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (530, 550, 340, 100),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 40)
+            self._screen.blit(font.render("About", False, (0, 0, 0)), (640, 580))
+
+    def update_game_screen(
         self, game_board: GameBoard, current_player: int, players: list[Player]
     ) -> None:
         """Updates the squares based on the state of the board."""
 
+        # Turn indicator
+        font = pygame.font.SysFont("Fira Code", 30)
+        text_surface = font.render("'s turn", False, (0, 0, 0))
+        self._screen.blit(text_surface, (700, 70))
         pygame.draw.rect(
             self._screen, self._player_colors[current_player], (670, 70, 30, 30)
         )
+
+        self._draw_game_grid()
 
         for row in range(game_board.height):
             for col in range(game_board.width):
@@ -96,6 +143,55 @@ class GraphicsHandler:
             self._draw_player_grid(i)
 
         self._highlight_piece(current_player, players)
+
+    def update_game_over_screen(
+        self, home_button: bool, scores: list[int], winners: list[int]
+    ):
+        # Fill in screen to redraw everything
+        self._screen.fill(self._BG_COLOR)
+
+        font = pygame.font.SysFont("Fira Code", 50)
+        text_surface = font.render("Winners: ", False, (0, 0, 0))
+        self._screen.blit(text_surface, (565 - 35 * len(winners), 150))
+
+        for i in range(len(winners)):
+            pygame.draw.rect(
+                self._screen,
+                self._player_colors[winners[i]],
+                (775 + (50 + 25) * (i + 1) - 30 * len(winners), 150, 50, 50),
+            )  # This just works trust
+
+        font = pygame.font.SysFont("Fira Code", 25)
+        for i in range(len(scores)):
+            pygame.draw.rect(
+                self._screen,
+                self._player_colors[i],
+                (200 + 312.5 * i, 330, 50, 50),
+            )
+            text_surface = font.render(f"Score: {scores[i]}", False, (0, 0, 0))
+            self._screen.blit(text_surface, (200 + 312.5 * i - 50, 440))
+
+        # Expand button if hovered over
+        if home_button:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (520, 545, 374, 110),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 44)
+            self._screen.blit(font.render("Home", False, (0, 0, 0)), (645, 576))
+        else:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (530, 550, 340, 100),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 40)
+            self._screen.blit(font.render("Home", False, (0, 0, 0)), (650, 580))
 
     def get_square_from_coords(self, coords):
         """Takes a set of coordinates and returns the position on the game board."""
@@ -245,9 +341,8 @@ class GraphicsHandler:
     def _update_score_text(self, player_id: int, players: list[Player]):
         """Updates the score of each player in each box."""
         player = players[player_id]
-        text_surface = self.font.render(
-            f"Squares left: {player.squares_left}", False, (0, 0, 0)
-        )
+        font = pygame.font.SysFont("Fira Code", 20)
+        text_surface = font.render(f"Score: {-player.squares_left}", False, (0, 0, 0))
 
         # Calculate the upper-left coordinate of the bounding box of the text
         x_margin = self._player_grid_margins[player_id][0]
@@ -268,8 +363,8 @@ class GraphicsHandler:
         )
 
         # Update x and y to center the text
-        x += 65
-        y += (self._PLAYER_GRID_HEIGHT - self._FONT_SIZE) / 2
+        x += 100
+        y += (self._PLAYER_GRID_HEIGHT - 20) / 2
 
         # Draw the text
         self._screen.blit(text_surface, (x, y))
