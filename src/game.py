@@ -117,19 +117,32 @@ class Game:
                     self._update_turn()
                 elif 520 <= coords[0] <= 880 and 540 <= coords[1] <= 660:
                     self._game_state = 1
+                    self._graphics_handler.blur_screen()
+
+        elif self._game_state == 1:
+            if 520 <= coords[0] <= 880 and 495 <= coords[1] <= 615:
+                self._graphics_handler.update_about_screen(True)
+            else:
+                self._graphics_handler.update_about_screen(False)
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if 520 <= coords[0] <= 880 and 495 <= coords[1] <= 615:
+                    self._game_state = 0
 
         elif self._game_state == 2:  # In game
-            # Get the coordinates and check if it is an actual move
+            # Convert the coordinates into the square that the mouse is hovering over
             square = self._graphics_handler.get_square_from_coords(coords)
-            if -1 in square:
-                return
 
             # No pieces left or no legal moves? Skip the turn
             player = self._players[self._current_player]
             piece = player.get_piece()
 
             # Places a piece on left click
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button == 1
+                and -1 not in square
+            ):
                 if self._board.place_piece(
                     piece, square[0], square[1], self._current_player
                 ):

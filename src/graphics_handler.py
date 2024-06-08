@@ -84,7 +84,7 @@ class GraphicsHandler:
                 border_radius=20,
             )
             font = pygame.font.SysFont("Fira Code", 44)
-            self._screen.blit(font.render("About", False, (0, 0, 0)), (635, 576))
+            self._screen.blit(font.render("Rules", False, (0, 0, 0)), (635, 576))
         else:
             pygame.draw.rect(
                 self._screen,
@@ -94,7 +94,60 @@ class GraphicsHandler:
                 border_radius=20,
             )
             font = pygame.font.SysFont("Fira Code", 40)
-            self._screen.blit(font.render("About", False, (0, 0, 0)), (640, 580))
+            self._screen.blit(font.render("Rules", False, (0, 0, 0)), (640, 580))
+
+    def blur_screen(self):
+        alpha_surface = pygame.Surface((1400, 750), pygame.SRCALPHA)
+        alpha_value = 128
+        alpha_surface.fill(self._BG_COLOR + (alpha_value,))
+
+        self._screen.blit(alpha_surface, (0, 0))
+
+    def update_about_screen(self, back_button):
+        # Blur the rest of the screen
+        rect = pygame.Rect(400, 75, 600, 625)
+        pygame.draw.rect(self._screen, self._BG_COLOR, rect, border_radius=20)
+        pygame.draw.rect(self._screen, (0, 0, 0), rect, width=5, border_radius=20)
+
+        font = pygame.font.SysFont("Fira Code", 14)
+        text = """
+        The first piece played by each player must cover a corner\n 
+        square. Each new piece must touch at least one other piece\n 
+        of the same color, but only at the corners. Pieces of the\n 
+        same color can never touch along a side.\n\n 
+        Whenever a player is unable to place a piece on the board,\n 
+        that player must pass their turn. The game ends when neither\n 
+        player can place any more pieces.\n\n
+        The scores for each player depend on how many squares\n 
+        there are in their remaining pieces. 1 square = -1 point.\n 
+        A player earns +15 points if all of their pieces have been\n 
+        placed on the board plus 5 bonus points if the last piece\n 
+        they placed on the board was the smallest piece.\n
+        """
+
+        for i, line in enumerate(text.splitlines()):
+            self._screen.blit(font.render(line, False, (0, 0, 0)), (360, 140 + 12 * i))
+
+        if back_button:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (520, 500, 374, 110),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 44)
+            self._screen.blit(font.render("Back", False, (0, 0, 0)), (640, 531))
+        else:
+            pygame.draw.rect(
+                self._screen,
+                (0, 0, 0),
+                (530, 505, 340, 100),
+                width=3,
+                border_radius=20,
+            )
+            font = pygame.font.SysFont("Fira Code", 40)
+            self._screen.blit(font.render("Back", False, (0, 0, 0)), (645, 535))
 
     def update_game_screen(
         self, game_board: GameBoard, current_player: int, players: list[Player]
@@ -204,6 +257,17 @@ class GraphicsHandler:
                 square[1] = i
             if val <= y - self._Y_MARGIN <= val + self._GRID_BOX_SIZE:
                 square[0] = i
+
+        # If the square is out of bounds, return boundary index so that things can still be updated
+        if y < self._Y_MARGIN:
+            square[0] = 0
+        elif y > self._Y_MARGIN + self._coordinates[-1]:
+            square[0] = 19
+        if x < self._X_MARGIN:
+            square[1] = 0
+        elif x > self._X_MARGIN + self._coordinates[-1]:
+            square[1] = 19
+
         return square
 
     def _draw_game_grid(self):
